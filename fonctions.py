@@ -1,19 +1,19 @@
 import pygame
 from pygame.locals import *
 
-#création de "mur"
+# création de "mur"
 mur = pygame.Surface((20, 20))
 brun = (117, 89, 60)
 mur.fill(brun)
 
-#on crée la carte selectionner
+# on crée la carte selectionner
 def creation_carte(surface, carte):
     for k, ligne in enumerate(carte):
         for i, case in enumerate(ligne):
             if case == 1:
                 surface.blit(mur, (i * 20, k * 20))
 
-#indique ou ce situe notre cube sur la carte
+# indique ou ce situe notre cube sur la carte
 def position_cube(position):
 
     cube_x, cube_y = position
@@ -21,7 +21,7 @@ def position_cube(position):
     k = max(0, int(cube_y // 20))
     return i, k
 
-#envoie les zone concérner par la collision
+# envoie les zone concérner par la collision
 def zone_collision_cube(carte, i_cube, k_cube):
 
     blocks = list()
@@ -33,13 +33,13 @@ def zone_collision_cube(carte, i_cube, k_cube):
                     blocks.append(pygame.Rect((topleft), (20, 20)))
     return blocks
 
-#la ou se passe tout la collision
+# la ou se passe tout la collision
 def collision(carte, old_position, new_position, cube_vx, cube_vy):
 
     old_rect = pygame.Rect(old_position, (40, 40))
     new_rect = pygame.Rect(new_position, (40, 40))
     i, k = position_cube(new_position)
-    collide_later = list()#on crée un tableau vide
+    collide_later = list() # on crée un tableau vide
     blocks = zone_collision_cube(carte, i, k)
     for block in blocks:
         if not new_rect.colliderect(block):
@@ -92,7 +92,7 @@ def compute_penetration(block, old_rect, new_rect):
         dx_correction = block.right - new_rect.left
     return dx_correction, dy_correction
 
-#calcule la direction est la vitesse des tire du cube
+# calcule la direction est la vitesse des tire du cube
 def tire_cible(cube_x, cube_y, cible_x, cible_y):
 
     cube_x += 13
@@ -106,7 +106,7 @@ def tire_cible(cube_x, cube_y, cible_x, cible_y):
     v_y = k * v_y
     return v_x, v_y
 
-#detecte si le cube est sur un mure et si oui le supprime
+# detecte si le cube est sur un mure et si oui le supprime
 def collision_tire(carte, balle_x, balle_y, tire):
 
     x_1, x_2 = balle_x, balle_x + 14

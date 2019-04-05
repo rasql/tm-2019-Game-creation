@@ -1,42 +1,41 @@
 import pygame
 from pygame.locals import *
-from Fonction import *
-from Carte import *
+from fonctions import *
+from carte import *
 
 pygame.init()
 
-#on choisit la carte
-
+# on choisit la carte
 carte = carte_1
 
-#taille de la fenetre
-x, y = 1000, 600
-taille_fenetre = (x, y)
-surface_fenetre = pygame.display.set_mode((taille_fenetre))#crée la fenetre
+# taille de la fenetre
+w, h = 1000, 600
+taille_fenetre = (w, h)
+surface_fenetre = pygame.display.set_mode((taille_fenetre)) # crée la fenetre
 
-blanc = (200, 255, 255)
-#bleu = (5, 5, 30)
-rouge = (255,0,0)
+BLANC  = (200, 255, 255)
+# bleu = (5, 5, 30)
+ROUGE  = (255,0,0)
 
 timer = pygame.time.Clock()
-#création du cube
-cube = pygame.image.load("zombie.png").convert_alpha()
+# création du cube
+cube = pygame.image.load("images/zombie.png").convert_alpha()
 cube = pygame.transform.scale(cube, (40, 40))
 cube.set_colorkey((255,255,255))
 # Position de départ du cube
-cube_x, cube_y = (500-20), (y*3/5-20)
+cube_x, cube_y = (500-20), (h*3/5-20)
 # Vitesse du joueur
 cube_vx, cube_vy = 0, 0
 
-fond = pygame.image.load("foret.jpg")
+fond = pygame.image.load("images/foret.jpg")
 fond = pygame.transform.scale(fond, (1002,602))
 
 gravite = 0.8
 
-portail = pygame.image.load("portail.png")
+portail = pygame.image.load("images/portail.png")
 portail = pygame.transform.scale(portail, (100, 140))
 
-# Boucle pour tout les touches que le joueur peut utuliser
+# Boucle pour tout les touches que le joueur peut utiliser
 timer_portail = 0
 tire = 0
 down = 0
@@ -67,7 +66,7 @@ while continuer:
             if event.button == 1:
                 balle = pygame.Surface((14,14))
                 balle_x, balle_y = (cube_x+7, cube_y+7)
-                balle.fill(rouge)
+                balle.fill(ROUGE )
                 tire = 300
                 cible_x = event.pos[0]
                 cible_y = event.pos[1]
@@ -76,11 +75,11 @@ while continuer:
 
     # Chaque frame = (1/tick sec) ~IPS
     timer.tick(60)
-    #touche pour bouger a droite et a gauche(des 0 et des 1)
+    # touche pour bouger a droite et a gauche(des 0 et des 1)
     touche_appuyer = pygame.key.get_pressed()
     old_x, old_y = cube_x, cube_y
     cube_vx = (touche_appuyer[K_d] - touche_appuyer[K_a]) * 7
-    #on applique les déplacement
+    # on applique les déplacement
     cube_vy += gravite
     if down == 0:
         cube_vy = min(16, cube_vy)  # On limite la vitesse de la vitesse de chut
@@ -89,7 +88,7 @@ while continuer:
     # mure de l'écran
     cube_y = min(3000, cube_y)
     cube_y = max(-250, cube_y)
-    #modifie c'est 4 donner par rapport au collision
+    # modifie c'est 4 donner par rapport au collision
     cube_x, cube_y, cube_vx, cube_vy = collision(carte, (old_x, old_y), (cube_x, cube_y), cube_vx, cube_vy)
 
     if carte == carte_1:
@@ -126,7 +125,7 @@ while continuer:
 
     timer_portail -= 1
 
-    surface_fenetre.fill(blanc)
+    surface_fenetre.fill(BLANC )
     surface_fenetre.blit(fond, (-2,-2))
 
     if tire > 0:
