@@ -1,39 +1,97 @@
-import pygame
 from pygame.locals import *
 from fonctions import *
 from carte import *
 
 pygame.init()
 
-# on choisit la carte
-carte = carte_1
-
 # taille de la fenetre
-w, h = 1000, 600
+w, h = 1280, 720
 taille_fenetre = (w, h)
-surface_fenetre = pygame.display.set_mode((taille_fenetre)) # crée la fenetre
+surface_fenetre = pygame.display.set_mode(taille_fenetre)  # crée la fenetre
+# surface_fenetre = pygame.display.set_mode(taille_fenetre, pygame.FULLSCREEN)  # (MAC)
 
-BLANC  = (200, 255, 255)
-# bleu = (5, 5, 30)
-ROUGE  = (255,0,0)
+# initialisation du text
+text = pygame.font.SysFont("monospace", 25)
+money = 0
+
+# cx,cy = caméra a la position x et y (w, h)
+cx, cy = 0, 0
+souris_x, souris_y = 0, 0  # on initiallise les variables de la position
+
+BLANC = (255, 255, 255)
+BLEU = (5, 5, 30)
+ROUGE = (255, 0, 0)
+BRUN = (105, 65, 25)
+GRIS = (180, 180, 180)
+NOIR = (12, 12, 15)
+
+plan3 = pygame.Surface((12000, 1000))
+plan3.fill(BLANC)
+plan3.set_colorkey(BLANC)  # rend la partie blanche invisible
+plan1 = pygame.Surface((12000, 1000))
+plan1.fill(BLANC)
+plan1.set_colorkey(BLANC)
 
 timer = pygame.time.Clock()
 # création du cube
 cube = pygame.image.load("images/zombie.png").convert_alpha()
 cube = pygame.transform.scale(cube, (40, 40))
-cube.set_colorkey((255,255,255))
 # Position de départ du cube
 cube_x, cube_y = (500-20), (h*3/5-20)
 # Vitesse du joueur
 cube_vx, cube_vy = 0, 0
 
-fond = pygame.image.load("images/foret.jpg")
-fond = pygame.transform.scale(fond, (1002,602))
+#  bad = ennemi
+bad1 = pygame.image.load("images/triangle.png").convert_alpha()
+bad1 = pygame.transform.scale(bad1, (40, 40))
+tab_ennemis = []
 
-gravite = 0.8
+# création des arrière plans
+fond1 = pygame.image.load("images/fond1.jpg")
+fond1 = pygame.transform.scale(fond1, (1600, 800))
 
-portail = pygame.image.load("images/portail.png")
-portail = pygame.transform.scale(portail, (100, 140))
+fond2 = pygame.image.load("images/fond2.jpg")
+fond2 = pygame.transform.scale(fond2, (1600, 800))
+
+fond3 = pygame.image.load("images/fond3.jpg")
+fond3 = pygame.transform.scale(fond3, (1600, 800))
+
+hud_bas = pygame.Surface((1280, 90))
+hud_bas.fill(NOIR)
+
+hud_droit = pygame.Surface((100, 100))
+hud_droit.fill(NOIR)
+
+balle = pygame.Surface((14, 14))
+balle.fill(ROUGE)
+cible_x, cible_y, balle_x, balle_y, depart_x, depart_y = 0, 0, 0, 0, 0, 0
+
+gravite = 0.7
+# (0.7)
+
+# création du 3ème plan
+plan3.blit(fond1, (-2, -118))
+plan3.blit(fond2, (1598, -118))
+plan3.blit(fond3, (3198, -118))
+
+
+# on crée le monde
+carte0 = map1a
+carte6 = map1g
+
+carte = randome_carte()
+carte1 = carte
+carte = randome_carte()
+carte2 = carte
+carte = randome_carte()
+carte3 = carte
+carte = randome_carte()
+carte4 = carte
+carte = randome_carte()
+carte5 = carte
+
+# crée le monde 1
+plan1 = creation_carte(carte0, carte1, carte2, carte3, carte4, carte5, carte6, plan1, tab_ennemis)
 
 # Boucle pour tout les touches que le joueur peut utiliser
 timer_portail = 0
@@ -43,38 +101,60 @@ continuer = True
 while continuer:
     for event in pygame.event.get():
         if event.type == QUIT:
-            stop = 1
             continuer = False
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
-                stop = 1
                 continuer = False
         if event.type == KEYDOWN:
-            if event.key == K_SPACE or event.key == K_w:
-                if cube_vy >= 0 and cube_vy <= 0.8:
+            if event.key == K_SPACE or event.key == K_w or event.key == K_UP:
+                if cube_vy == 0 or cube_vy == 0.7:
                     cube_vy = -15
                     down = 0
         if event.type == KEYDOWN:
-            if event.key == K_s:
+            if event.key == K_s or event.key == K_DOWN:
                 cube_vy = 25
                 down = 1
         if event.type == KEYDOWN:
             if event.key == K_RETURN:
                 cube_vy = -3
-                cube_x ,cube_y = (460), (380)
+                cube_x, cube_y = 460, 380
         if event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
-                balle = pygame.Surface((14,14))
-                balle_x, balle_y = (cube_x+7, cube_y+7)
-                balle.fill(ROUGE )
-                tire = 300
-                cible_x = event.pos[0]
-                cible_y = event.pos[1]
-                cube_x_fix = cube_x
-                cube_y_fix = cube_y
+                tire = 200
+                depart_x, depart_y = cube_x + 13, cube_y + 13
+                balle_x, balle_y = cube_x + 13, cube_y + 13
+                cible_x = event.pos[0] - 7
+                cible_y = event.pos[1] - 7
+                if cible_x or cible_y == 0:
+                    cible_x += 1
+                    cible_y += 1
+                a, b = int((cible_x - cube_x)/3), int((cube_x - cible_x)/3)
+                if a < b:
+                    cible_x += random.randint(a, b)
+                if a > b:
+                    cible_x += random.randint(b, a)
+                a, b = int((cible_y - cube_y)/3), int((cube_y - cible_y)/3)
+                if a < b:
+                    cible_y += random.randint(a, b)
+                if a > b:
+                    cible_y += random.randint(b, a)
+        if event.type == MOUSEMOTION:
+            souris_x = event.pos[0]  # envoie les position de la souris à la caméra
+            souris_y = event.pos[1]
 
-    # Chaque frame = (1/tick sec) ~IPS
-    timer.tick(60)
+    money_text = text.render(str(money), 1, BLANC)
+
+    # calcule de la position de la caméra
+    cx = cube_x - 20 - 640 - ((1280 - souris_x - 2) - 640)/2
+    """cy = (cube_y - 20 - 360 - ((720 - souris_y - 2) - 320)/2) - 80"""
+
+    if cx <= 0:
+        cx = 0
+    """if cx >= 1280:
+        cx = 1280"""
+    """if cy >= 0:
+        cy = 0"""
+
     # touche pour bouger a droite et a gauche(des 0 et des 1)
     touche_appuyer = pygame.key.get_pressed()
     old_x, old_y = cube_x, cube_y
@@ -89,60 +169,63 @@ while continuer:
     cube_y = min(3000, cube_y)
     cube_y = max(-250, cube_y)
     # modifie c'est 4 donner par rapport au collision
-    cube_x, cube_y, cube_vx, cube_vy = collision(carte, (old_x, old_y), (cube_x, cube_y), cube_vx, cube_vy)
-
-    if carte == carte_1:
-        if cube_x > 1000:
-            cube_x = 0
-            carte = carte_2
-    if carte == carte_2:
-        if cube_x < -40:
-            cube_x = 960
-            carte = carte_1
-
-    if cube_y < -40:
-        cube_y = 600
-        cube_x = 680
-        carte = carte_1
-
-    if cube_y > 600:
-        cube_y = -40
-        carte = carte_4
-
-
-    if timer_portail <= 1:
-        if carte == carte_2:
-            if cube_x >= 580 and cube_x <= 720 and cube_y >= 400 and cube_y <= 580:
-                carte = carte_3
-                cube_x,cube_y = 480, 100
-                timer_portail = 120
-    if timer_portail <= 1:
-        if carte == carte_3:
-            if cube_x >= 410 and cube_x <= 550 and cube_y >= 10 and cube_y <= 190:
-                carte = carte_2
-                cube_x, cube_y = 650, 490
-                timer_portail = 120
-
-    timer_portail -= 1
-
-    surface_fenetre.fill(BLANC )
-    surface_fenetre.blit(fond, (-2,-2))
+    if -40 <= cube_x <= 1280:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte0, (old_x, old_y), (cube_x, cube_y), cube_vx, cube_vy)
+    if 1240 <= cube_x <= 2560:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte1, (old_x - 1280, old_y), (cube_x - 1280, cube_y), cube_vx, cube_vy)
+        cube_x += 1280
+    if 2520 <= cube_x <= 3840:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte2, (old_x - 2560, old_y), (cube_x - 2560, cube_y), cube_vx, cube_vy)
+        cube_x += 2560
+    if 3800 <= cube_x <= 5120:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte3, (old_x - 3840, old_y), (cube_x - 3840, cube_y), cube_vx, cube_vy)
+        cube_x += 3840
+    if 5080 <= cube_x <= 6400:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte4, (old_x - 5120, old_y), (cube_x - 5120, cube_y), cube_vx, cube_vy)
+        cube_x += 5120
+    if 6360 <= cube_x <= 7680:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte5, (old_x - 6400, old_y), (cube_x - 6400, cube_y), cube_vx, cube_vy)
+        cube_x += 6400
+    if 7640 <= cube_x <= 9660:
+        cube_x, cube_y, cube_vx, cube_vy = collision(carte6, (old_x - 7680, old_y), (cube_x - 7680, cube_y), cube_vx, cube_vy)
+        cube_x += 7680
 
     if tire > 0:
 
-        v_x, v_y = tire_cible(cube_x_fix, cube_y_fix, cible_x, cible_y)
-        balle_x += v_x*5.5
-        balle_y += v_y*5.5
+        balle_vx, balle_vy = tire_cible(depart_x, depart_y, cible_x, cible_y, cx, cy)
+        balle_x += balle_vx * 5.5
+        balle_y += balle_vy * 5.5
         tire -= 1
-        tire = collision_tire(carte, balle_x, balle_y, tire)
-        surface_fenetre.blit(balle, (balle_x, balle_y))
+        if -40 <= balle_x <= 1280:
+            tire = collision_tire(carte0, balle_x, balle_y, tire, tab_ennemis, 0)
+        if 1240 <= balle_x <= 2560:
+            tire = collision_tire(carte1, balle_x - 1280, balle_y, tire, tab_ennemis, 1)
+        if 2520 <= balle_x <= 3840:
+            tire = collision_tire(carte2, balle_x - 2560, balle_y, tire, tab_ennemis, 2)
+        if 3800 <= balle_x <= 5120:
+            tire = collision_tire(carte3, balle_x - 3840, balle_y, tire, tab_ennemis, 3)
+        if 5080 <= balle_x <= 6400:
+            tire = collision_tire(carte4, balle_x - 5120, balle_y, tire, tab_ennemis, 4)
+        if 6360 <= balle_x <= 7680:
+            tire = collision_tire(carte5, balle_x - 6400, balle_y, tire, tab_ennemis, 5)
+        if 7640 <= balle_x <= 9660:
+            tire = collision_tire(carte6, balle_x - 7680, balle_y, tire, tab_ennemis, 6)
 
-    if carte == carte_2:
-        surface_fenetre.blit(portail, (620,440))
-    if carte == carte_3:
-        surface_fenetre.blit(portail, (450,50))
-
-    creation_carte(surface_fenetre, carte)
-    surface_fenetre.blit(cube, (cube_x, cube_y))
+    #  plan3, plan2, plan1 = 3ème plan, 2ème plan, 1er plan
+    #  affiche à l'écran tout les object a afficher
+    surface_fenetre.fill(BLANC)
+    surface_fenetre.blit(plan3, (- cx / 3, - cy / 2))
+    if tire > 0:
+        surface_fenetre.blit(balle, (balle_x - cx, balle_y - cy))
+    afficher_ennemis(surface_fenetre, tab_ennemis, bad1, cx, cy)
+    surface_fenetre.blit(cube, (cube_x - cx, cube_y - cy))
+    surface_fenetre.blit(plan1, (-cx, -cy))
+    surface_fenetre.blit(hud_bas, (0, 630))
+    surface_fenetre.blit(hud_droit, (1180, 0))
+    surface_fenetre.blit(money_text, (1230, 20))
     pygame.display.flip()
+
+    # Chaque frame = (1/tick sec) ~IPS
+    timer.tick(60)
+
 pygame.quit()
