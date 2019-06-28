@@ -169,19 +169,22 @@ def collision_tire(carte, balle_x, balle_y, tire, tab_ennemis, k):
 def randome_carte():
     # Envoie une carte aléatoire
 
-    randome = random.randint(0, 4)
-    if randome == 0:
-        carte = map1b
-    if randome == 1:
-        carte = map1c
-    if randome == 2:
-        carte = map1d
-    if randome == 3:
-        carte = map1e
-    if randome == 4:
-        carte = map1f
+    # randome = random.randint(0, 4)
+    # if randome == 0:
+    #     carte = map1b
+    # if randome == 1:
+    #     carte = map1c
+    # if randome == 2:
+    #     carte = map1d
+    # if randome == 3:
+    #     carte = map1e
+    # if randome == 4:
+    #     carte = map1f
 
-    return carte
+    #  return carte
+    maps = [map1b, map1c, map1d, map1e, map1f]
+    map = random.choice(maps)
+    return map
 
 
 def creation_carte(carte0, carte1, carte2, carte3, carte4, carte5, carte6, plan1, tab_ennemis):
@@ -217,3 +220,6 @@ def creation_carte(carte0, carte1, carte2, carte3, carte4, carte5, carte6, plan1
             carte = carte6
 
     return plan1
+
+if __name__ == '__main__':
+    print(randome_carte())
