@@ -182,9 +182,10 @@ class Player:
         i, j = self.map.get_index(self.x, self.y)
 
         if self.map.table[i+1][j]:
-            self.x = i*d
+            # self.x = i*d
+            pass
 
-        if self.map.table
+        # if self.map.table
  
         
         # check bottom position
@@ -221,7 +222,7 @@ class Player:
             self.vy = 0
 
 
-        if vx > 0:
+        # if vx > 0:
 
         
 
